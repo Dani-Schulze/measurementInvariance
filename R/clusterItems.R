@@ -25,6 +25,8 @@
 #'                                   loadThreshold = 0.3,
 #'                                   intThreshold = 0.5)
 #'
+#' @importFrom msm "deltamethod"
+#'
 #' @export
 
 
@@ -337,7 +339,7 @@ kMeansBMtest <- function(output, # fitted lavaan/mirt model
     if (k == length(items)) {
       break
     }
-    clusCode <- Ckmeans.1d.dp:::Ckmeans.1d.dp(drids[[type]][, which(colnames(drids$L) %in% items)[1]][which(colnames(drids$L) %in% items)], k = k)$cluster
+    clusCode <- Ckmeans.1d.dp::Ckmeans.1d.dp(drids[[type]][, which(colnames(drids$L) %in% items)[1]][which(colnames(drids$L) %in% items)], k = k)$cluster
     multipleItemClusters <- unname(which(table(clusCode) != 1))        # filter for clusters with more than 1 item
     history[[k]] <- list(clusCode = clusCode)
     for (i in multipleItemClusters) {
