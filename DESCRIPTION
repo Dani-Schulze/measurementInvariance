@@ -1,6 +1,6 @@
 Package: measurementInvariance
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Comprehensive (partial) measurement invairance analysis
 Version: 0.2.0-250521
 Author: Daniel Schulze [aut, cre]
 Maintainer: Daniel Schulze <daniel.schulze@fu-berlin.de>
