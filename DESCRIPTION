@@ -1,11 +1,13 @@
 Package: measurementInvariance
 Type: Package
-Title: Comprehensive (partial) measurement invairance analysis
+Title: (Partial) measurement invariance analysis
 Version: 0.2.0-250521
 Author: Daniel Schulze [aut, cre]
 Maintainer: Daniel Schulze <daniel.schulze@fu-berlin.de>
 Description: Testing measurement invariance (MI) and providing tools for dealing with partial MI models for a wide range of measurement model types.
 Depends: R (>= 3.5.0), lavaan (>= 0.6), mirt (>= 1.3)
+VignetteBuilder: knitr
+Suggests: knitr, rmarkdown
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
