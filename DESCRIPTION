@@ -2,7 +2,7 @@ Package: measurementInvariance
 Type: Package
 Title: What the Package Does (Title Case)
 Version: 0.2.0-250521
-Authors@R: person("Daniel", "Schulze", role = c("cre", "aut"))
+Author: Daniel Schulze [aut, cre]
 Maintainer: Daniel Schulze <daniel.schulze@fu-berlin.de>
 Description: Testing measurement invariance (MI) and providing tools for dealing with partial MI models for a wide range of measurement model types.
 Depends: R (>= 3.5.0), lavaan (>= 0.6), mirt (>= 1.3)
