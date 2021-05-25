@@ -1,0 +1,212 @@
+---
+title: "measurementInvariance"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("X:/LS-POHL/Mitarbeiter/Daniel/# R Package")
+source("Package source.R")
+library(knitr)
+```
+
+Version 0.2
+
+# Package overview
+
+measurementInvariance is an R package dedicated to sound measurement invariance (MI) analysis, focusing on issues of establishing partial MI. It subsumes SEM and IRT models by importing from lavaan and mirt respectively.
+
+Imported packages: 
+
+* lavaan
+* mirt
+* Ckmeans.1d.dp
+* reshape2
+* msm
+* blavaan (only needed in Bayesian part)
+* rstan (only needed in Bayesian part)
+
+# Function overview
+
+There are 4 main functions:
+
+* testMI(): Global MI tests
+* clusterItems(): Under violations of MI, find clusters (subsets) of items, for which MI holds
+* partialMI(): Use a chosen item cluster as anchor
+* bayModAveraging(): When not choosing an item cluster, apply Bayesian model averaging to reflect information from several competing partial MI models. [not yet outlined in this version of the vignette.]
+
+The typical work flow is intended to be testMI() -> clusterItems() -> either partialMI() or bayModAveraging().
+
+```{r, echo = FALSE}
+t_testMI <- matrix(c("X", "X", "", "",
+                     "X", "X", "", "",
+                     "X", "X", "", "",
+                     "X", "X", "", "",
+                     "", "", "", ""), nrow = 5, ncol = 4, byrow = TRUE)
+rownames(t_testMI) <- c("cont. items",
+                        "dich. items: factor",
+                        "dich. items: Rasch",
+                        "dich. items: 2PL",
+                        "ordinal")
+colnames(t_testMI) <- c("2 groups",
+                        "> 2 groups",
+                        "longit. (2)",
+                        "cont. covar")
+kable(t_testMI, caption = "Current state of testMI()", align = "c")
+
+t_clusterItems <- matrix(c("X", "", "", "",
+                           "X", "", "", "",
+                           "X", "", "", "",
+                           "X", "", "", "",
+                           "", "", "", ""), nrow = 5, ncol = 4, byrow = TRUE)
+rownames(t_clusterItems) <- c("cont. items",
+                              "dich. items: factor",
+                              "dich. items: Rasch",
+                              "dich. items: 2PL",
+                              "ordinal")
+colnames(t_clusterItems) <- c("2 groups",
+                              "> 2 groups",
+                              "longitudinal (2)",
+                              "cont. covar")
+kable(t_clusterItems, caption = "Current state of clusterItems()", align = "c")
+
+t_partialMI <- matrix(c("X", "", "", "","X",
+                         "X", "", "", "","X",
+                         "X", "", "", "","X",
+                         "X", "", "", "","X",
+                         "", "", "", "", ""), nrow = 5, ncol = 5, byrow = TRUE)
+rownames(t_partialMI) <- c("cont. items",
+                        "dich. items: factor",
+                        "dich. items: Rasch",
+                        "dich. items: 2PL",
+                        "ordinal")
+colnames(t_partialMI) <- c("2 groups",
+                        "> 2 groups",
+                        "longitudinal (2)",
+                        "cont. covar",                       
+                        "multidim.")
+kable(t_partialMI, caption = "Current state of partialMI()", align = "c")
+
+t_bayModAveraging <- matrix(c("", "", "", "","",
+                              "", "", "", "","",
+                              "", "", "", "","",
+                              "X", "", "", "","",
+                              "", "", "", "", ""), nrow = 5, ncol = 5, byrow = TRUE)
+rownames(t_bayModAveraging) <- c("cont. items",
+                        "dich. items: factor",
+                        "dich. items: Rasch",
+                        "dich. items: 2PL",
+                        "ordinal")
+colnames(t_bayModAveraging) <- c("2 groups",
+                        "> 2 groups",
+                        "longitudinal (2)",
+                        "cont. covar",                       
+                        "multidim.")
+kable(t_bayModAveraging, caption = "Current state of bayModAveraging()", align = "c")
+```
+
+# Continuous data
+
+Here we are taking data from the Holzinger-Swinefort (1939) example on cognitive tests. We will use the "Speed" and and the "Math" items with gender as a grouping variable, for which MI is to be tested.
+
+```{r}
+suppressMessages(library(MBESS))
+data(HS)
+Data <- HS[, c("t10_addition", "t11_code", "t12_counting_groups_of_dots", # speed items
+               "t13_straight_and_curved_capitals", 
+               "t20_deduction", "t21_numerical_puzzles", "t22_problem_reasoning", # math items
+               "t23_series_completion", "t24_woody_mccall", "sex")]
+colnames(Data) <- sub("_.*", "", colnames(Data)) # shorten variable names for convenience
+str(Data)
+```
+
+Assume, we are ultimately interested in the correlation of the two factors Speed and Math. We are thus interested in establishing weak MI. Set up a model just like we would in lavaan. We identify (borderline) issues with weak MI for Speed, while it holds for Math. (for cut offs see Chen, 2007)
+
+```{r}
+model <- "Speed =~ t10 + t11 + t12 + t13
+          Math =~ t20 + t21 + t22 + t23 + t24"
+
+res_testMI <- testMI(model, 
+                     group = "sex",
+                     data = Data,
+                     MIlevel = "weak")
+summary(res_testMI)
+```
+
+
+Proceed to identify item clusters for which MI holds. First, item clustering is done by setting a threshold in loading difference that is not to be surpassed by the items of a specific cluster. The smaller the threshold, the more homogeneous the items of a cluster become when compared across groups.
+
+```{r}
+res_clusterItems <- clusterItems(res_testMI,
+                                 MIholding = "Speed configural Math weak",
+                                 method = "threshold",
+                                 loadThreshold = 0.3)
+summary(res_clusterItems, 
+        order = "clusters")
+```
+
+Alternatively, a significance test can be used, which yields the same result in this example.
+
+```{r}
+res_clusterItems2 <- clusterItems(res_testMI,
+                                 MIholding = "Speed configural Math weak",
+                                 method = "sigTest",
+                                 pValue = 0.05)
+summary(res_clusterItems2, 
+        order = "clusters")
+```
+
+After inspection of the items we might decide for going with cluster 2 of the Speed items as anchor items. Hence we call the partialMI function:
+
+```{r}
+partialMI(res_clusterItems, 
+          "Speed 2 Math 1") # insert the factor names followed by the cluster label
+
+```
+
+After etablishing weak (partial) MI, it is now admissible to compare the latent correlation of Speed and Math between the groups. 
+
+
+# Dichotomous data & some further options
+
+The package provides good support for dichotomous data models via categorical SEM models in lavaan and IRT models in mirt. Here we have a second example from the FIMS study testing mathematical ability. Our goal is to compare the latent means of two countries (1 Australia - 2 Japan). We thus need to establish strong MI.
+
+```{r}
+suppressMessages(library(TAM))
+data("data.fims.Aus.Jpn.scored")
+dataDich <- data.fims.Aus.Jpn.scored[, -13] # drop one item that has serious issues (neg. loading!)
+str(dataDich)
+
+res_testMI <- testMI(items = colnames(dataDich[2:14]), # alternative to the model argument: 
+                     #stating a set of item names creates a single factor model. 
+                     #The latent variable will be called "Factor".
+                      group = "country",
+                      data = dataDich,
+                      MIlevel = "strong",
+                      dich = T,          # dichotomous items?
+                      dichModel = "2PL") # choose from "factor" [->lavaan], "Rasch" or "2PL" [-> mirt]
+summary(res_testMI)
+```
+
+We find considerable issues with weak MI, entailing a violation of strong MI.
+If you want to have a look at a specific model estimated by testMI(), use getModel(). 
+This prints a model summary. Additionally, any method from the core package (in this case: mirt) can be applied to the resulting object (e.g. coef(), show()). 
+
+```{r}
+
+resConfigural <- getModel(res_testMI, 
+                         "Factor",
+                         "configural")
+
+```
+
+Applying clusterItems() with thresholds for loadings and intercepts (or tresholds in IRT terms), we find 8 item clusters.
+
+```{r}
+res_clusterItems <- clusterItems(res_testMI,
+                                 MIholding = "configural",
+                                 method = "threshold",
+                                 loadThreshold = 0.4,
+                                 intThreshold = 0.6)
+summary(res_clusterItems)
+```
