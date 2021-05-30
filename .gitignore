@@ -2,3 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+.driveonweb
+inst/doc
+/doc/
+/Meta/

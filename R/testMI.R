@@ -115,7 +115,7 @@ testMI <- function(model = NULL,
   nGroups <- length(unique(na.omit(data[, group])))
   message(paste0("Input is a cross-sectional model with ", nGroups,
                  " group", if (length(unique(data[, group])) > 1) "s", " and ",
-                 length(lvs), " factor", if (length(lvs) > 1) "s", "."))
+                 length(lvs), " factor", if (length(lvs) > 1) "s fitted seperately", "."))
 
   ## checks
   if (any(unlist(lapply(items, FUN = length)) < 3)) {
@@ -337,6 +337,12 @@ testMI <- function(model = NULL,
   return(res)
 }
 
+
+
+#' @title Summary function for testMI
+#' @rdname summary-testMI
+#' @description Giving a summary of fit indices of an estimated testMI object per factor.
+#' @export
 
 summary.testMI <- function(res) {  # Tue May 25 08:57:08 2021 ------------------------------
   stopifnot(inherits(res, "testMI"))

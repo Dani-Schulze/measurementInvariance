@@ -1,4 +1,4 @@
-############ # Sat May 22 22:10:44 2021 ------------------------------
+############ # Thu May 27 15:05:41 2021 ------------------------------
 ###
 #' @title partialMI
 #'
@@ -8,7 +8,7 @@
 #' @param anchorClusters # String indicating which cluster to use for which factor,
 #' e.g. \code{"Factor1 1 Factor2 1"}
 #' for indicating to use cluster 1 of both item clusterings
-#' @param silent Do not print output? Defaults to \code{FALSE}.
+#' @param silent Do not print summary output? Defaults to \code{FALSE}.
 #'
 #' @return A single (multidimensional) model as defined by the \code{model}
 #' argument in \code{testMI}. Results are directly printed to the console but can
@@ -18,7 +18,6 @@
 #'                         "Factor1 1 Factor2 1")
 #'
 #' @export
-
 
 
 partialMI <- function(res_clusterItems,
@@ -31,8 +30,8 @@ partialMI <- function(res_clusterItems,
   lvsPlaces <- lapply(res$lvs, FUN = regexpr, anchorClusters) # parse input string # X added whitespace around =
   lvsPlaces <- append(lvsPlaces, nchar(anchorClusters) + 1) # add final stop in order to make loop below work
   if (any(lvsPlaces < 0) &&
-      nchar(anchorClusters) > (sum(nchar(lvs)) + 2*length(lvs))) {
-    stop("Error while reading chosenCluster. Couldn't retrieve factor names.", call. = FALSE)   # check for misspelled factor names
+      nchar(anchorClusters) > (sum(nchar(res$lvs)) + 2*length(res$lvs))) {
+    stop("Error while reading anchorClusters. Couldn't retrieve factor names.", call. = FALSE)   # check for misspelled factor names
   }
   for (lv in res$lvs) {
     clusters[[lv]] <- as.numeric(substring(anchorClusters, lvsPlaces[[which(

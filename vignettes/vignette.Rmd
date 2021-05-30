@@ -6,7 +6,7 @@ output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using measurementInvariance}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  \usepackage[utf8]{inputenc}
 ---
 
 ```{r setup, include = FALSE}
@@ -15,9 +15,10 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 library(knitr)
+#library(measurementInvariance)
 ```
 
-Version 0.2
+Version 0.3
 
 # Package overview
 
@@ -40,9 +41,9 @@ There are 4 main functions:
 * testMI(): Global MI tests
 * clusterItems(): Under violations of MI, find clusters (subsets) of items, for which MI holds
 * partialMI(): Use a chosen item cluster as anchor
-* bayModAveraging(): When not choosing an item cluster, apply Bayesian model averaging to reflect information from several competing partial MI models. [not yet outlined in this version of the vignette.]
+* modelAveraging(): When not choosing an item cluster, apply Bayesian model averaging to reflect information from several competing partial MI models.
 
-The typical work flow is intended to be testMI() -> clusterItems() -> either partialMI() or bayModAveraging().
+The typical work flow is intended to be testMI() -> clusterItems() -> either partialMI() or modelAveraging().
 
 ```{r, echo = FALSE}
 t_testMI <- matrix(c("X", "X", "", "",
@@ -94,9 +95,9 @@ colnames(t_partialMI) <- c("2 groups",
                         "multidim.")
 kable(t_partialMI, caption = "Current state of partialMI()", align = "c")
 
-t_bayModAveraging <- matrix(c("", "", "", "","",
+t_bayModAveraging <- matrix(c("X", "", "", "","",
                               "", "", "", "","",
-                              "", "", "", "","",
+                              "X", "", "", "","",
                               "X", "", "", "","",
                               "", "", "", "", ""), nrow = 5, ncol = 5, byrow = TRUE)
 rownames(t_bayModAveraging) <- c("cont. items",
@@ -109,10 +110,10 @@ colnames(t_bayModAveraging) <- c("2 groups",
                         "longitudinal (2)",
                         "cont. covar",                       
                         "multidim.")
-kable(t_bayModAveraging, caption = "Current state of bayModAveraging()", align = "c")
+kable(t_bayModAveraging, caption = "Current state of modelAveraging()", align = "c")
 ```
 
-# Continuous data
+# Continuous data (& partial MI)
 
 Here we are taking data from the Holzinger-Swinefort (1939) example on cognitive tests. We will use the "Speed" and and the "Math" items with gender as a grouping variable, for which MI is to be tested.
 
@@ -127,7 +128,7 @@ colnames(Data) <- sub("_.*", "", colnames(Data)) # shorten variable names for co
 str(Data)
 ```
 
-Assume, we are ultimately interested in the correlation of the two factors Speed and Math. We are thus interested in establishing weak MI. Set up a model just like we would in lavaan. We identify (borderline) issues with weak MI for Speed, while it holds for Math. (for cut offs see Chen, 2007)
+Assume, we are ultimately interested in the correlation of the two factors Speed and Math. We are thus interested in establishing weak MI. Set up a model just like in lavaan. The function testMI sets up models for all factor separately. We identify (borderline) issues with weak MI for Speed, while it holds for Math. (for cut offs see Chen, 2007)
 
 ```{r}
 model <- "Speed =~ t10 + t11 + t12 + t13
@@ -163,7 +164,7 @@ summary(res_clusterItems2,
         order = "clusters")
 ```
 
-After inspection of the items we might decide for going with cluster 2 of the Speed items as anchor items. Hence we call the partialMI function:
+After inspection of the items we might decide for going with cluster 2 of the Speed items and cluster 1 for Math items as anchor items. Hence we call the partialMI function:
 
 ```{r}
 partialMI(res_clusterItems, 
@@ -171,49 +172,73 @@ partialMI(res_clusterItems,
 
 ```
 
-After etablishing weak (partial) MI, it is now admissible to compare the latent correlation of Speed and Math between the groups. 
+After establishing weak (partial) MI, it is now admissible to compare the latent correlation of Speed and Math between the groups. 
 
 
-# Dichotomous data & some further options
+# Dichotomous data (& Bayesian model averaging)
 
-The package provides good support for dichotomous data models via categorical SEM models in lavaan and IRT models in mirt. Here we have a second example from the FIMS study testing mathematical ability. Our goal is to compare the latent means of two countries (1 Australia - 2 Japan). We thus need to establish strong MI.
+The package provides good support for dichotomous data models via categorical SEM models in lavaan and IRT models in mirt. Here we have a second example from the FIMS study testing mathematical ability where a 2PL IRT model is applied. Our goal is to compare the latent means of two countries (1 Australia - 2 Japan). We thus need to establish strong MI. We find no issues with weak MI, but clear violation of strong MI.
 
 ```{r}
 suppressMessages(library(TAM))
 data("data.fims.Aus.Jpn.scored")
-dataDich <- data.fims.Aus.Jpn.scored[, -13] # drop one item that has serious issues (neg. loading!)
+# choosing only a subset of items and a subset of the sample to keep a lid on
+# the computation times of Bayesian analyses
+dataDich <- data.fims.Aus.Jpn.scored[c(1:500, 5801:6300), c(2, 3, 4, 8, 9, 11, 15, 16)] 
 str(dataDich)
 
-res_testMI <- testMI(items = colnames(dataDich[2:14]), # alternative to the model argument: 
-                     #stating a set of item names creates a single factor model. 
-                     #The latent variable will be called "Factor".
+res_testMI <- testMI(items = colnames(dataDich[1:7]),
                       group = "country",
                       data = dataDich,
                       MIlevel = "strong",
-                      dich = T,          # dichotomous items?
-                      dichModel = "2PL") # choose from "factor" [->lavaan], "Rasch" or "2PL" [-> mirt]
+                      dich = T,
+                      dichModel = "2PL")
 summary(res_testMI)
+
 ```
 
-We find considerable issues with weak MI, entailing a violation of strong MI.
 If you want to have a look at a specific model estimated by testMI(), use getModel(). 
-This prints a model summary. Additionally, any method from the core package (in this case: mirt) can be applied to the resulting object (e.g. coef(), show()). 
+This prints a model summary. Additionally, any method from the core package (in this case: mirt) can be applied to the resulting object (e.g. coef, itemfit). 
 
 ```{r}
 
 resConfigural <- getModel(res_testMI, 
                          "Factor",
-                         "configural")
+                         "weak")
 
 ```
 
-Applying clusterItems() with thresholds for loadings and intercepts (or tresholds in IRT terms), we find 8 item clusters.
+Applying clusterItems() with a  thresholds for intercepts (or tresholds in IRT terms), we find three item clusters.
 
 ```{r}
 res_clusterItems <- clusterItems(res_testMI,
-                                 MIholding = "configural",
+                                 MIholding = "weak",
                                  method = "threshold",
-                                 loadThreshold = 0.4,
                                  intThreshold = 0.6)
 summary(res_clusterItems)
 ```
+
+These three clusters can be subject to Bayesian model averaging which returns an averaged mean difference of the two countries. Here we will assume a completely naive weighting scheme by equal weights for all clusters. The resulting averaged mean difference is shown in a plot which illustrates the vastly different results depending on the chosen anchor set. One cluster yields an inverse result compared to the other two clusters, leveling out a mean difference on average.
+
+```{r}
+bma <- modelAveraging(res_clusterItems,
+                      weights = rep(1/3, 3),
+                      iter = 100) # Runs long. Reduce for tests, if needed. 
+plotAverage(bma)
+```
+
+A specific partial model from the Bayesian analysis can be accessed by getModel. We can see that it is cluster three whose items yield a negative mean difference.
+
+```{r}
+getModel(bma, which = 3) # e.g. for cluster 3 as anchor
+```
+
+Other weights can easily be applied to an already estimated modelAveraging object:
+
+```{r}
+bma2 <- modelAveraging(res_modelAveraging = bma,
+                       weights = c(0.45, 0.45, 0.1))
+plotAverage(bma2)
+```
+
+

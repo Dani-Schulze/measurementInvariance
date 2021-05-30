@@ -14,7 +14,7 @@ res <- partialMI(res_clusterItems,
 e.g. \code{"Factor1 1 Factor2 1"}
 for indicating to use cluster 1 of both item clusterings}
 
-\item{silent}{Do not print output? Defaults to \code{FALSE}.}
+\item{silent}{Do not print summary output? Defaults to \code{FALSE}.}
 }
 \value{
 A single (multidimensional) model as defined by the \code{model}

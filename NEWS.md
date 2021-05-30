@@ -1,3 +1,12 @@
+# measurementInvariance 0.3.0-300521
+
+- added modelAveraging function for 2PL, Rasch and metric items [for IRT models, these Bayesian estimations are not yet done via precompiled STAN code. Thus they are currently rather slow and crash-prone. Should STAN crash R, simply try it again, it will probably work out.]
+- added plotAverage function for displaying results of the above
+- extended getModel in order to process Bayesian models
+- included the summary functions into the help files
+- some bugfixes in partialMI
+
+
 # measurementInvariance 0.2.0-250521
 
 First dev version on gitHub.
