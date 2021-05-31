@@ -221,24 +221,24 @@ summary(res_clusterItems)
 These three clusters can be subject to Bayesian model averaging which returns an averaged mean difference of the two countries. Here we will assume a completely naive weighting scheme by equal weights for all clusters. The resulting averaged mean difference is shown in a plot which illustrates the vastly different results depending on the chosen anchor set. One cluster yields an inverse result compared to the other two clusters, leveling out a mean difference on average.
 
 ```{r}
-bma <- modelAveraging(res_clusterItems,
-                      weights = rep(1/3, 3),
-                      iter = 100) # Runs long. Reduce for tests, if needed. 
-plotAverage(bma)
+#bma <- modelAveraging(res_clusterItems,
+#                      weights = rep(1/3, 3),
+#                      iter = 100) # Runs long. Reduce for tests, if needed. 
+#plotAverage(bma)
 ```
 
 A specific partial model from the Bayesian analysis can be accessed by getModel. We can see that it is cluster three whose items yield a negative mean difference.
 
 ```{r}
-getModel(bma, which = 3) # e.g. for cluster 3 as anchor
+#getModel(bma, which = 3) # e.g. for cluster 3 as anchor
 ```
 
 Other weights can easily be applied to an already estimated modelAveraging object:
 
 ```{r}
-bma2 <- modelAveraging(res_modelAveraging = bma,
-                       weights = c(0.45, 0.45, 0.1))
-plotAverage(bma2)
+#bma2 <- modelAveraging(res_modelAveraging = bma,
+#                       weights = c(0.45, 0.45, 0.1))
+#plotAverage(bma2)
 ```
 
 
