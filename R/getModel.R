@@ -36,10 +36,10 @@ getModel <- function(res,
                      which,
                      silent = FALSE) {
  # from testMI
-  if (!is.null(res$model)) {
+  if (!is.null(res$group)) {
     if (!silent) {
       if (res$settings$dichModel == "factor") {      # lavaan
-        summary(res[[factor]][[which]][[1]], fit.measures = TRUE)
+        lavaan::summary(res[[factor]][[which]][[1]], fit.measures = TRUE)
       } else {                                       # mirt
         cat("mirt model estimates\n\n")
         header <- capture.output(show(res[[factor]][[which]][[1]]))
@@ -52,7 +52,7 @@ getModel <- function(res,
           cat("Further fit statistics could not be computed due to missing values. (Maydeu-Olivares & Joe, 2006)")
         }
         cat("\n\nParameter Estimates:\n\n")
-        print(coef(res[[factor]][[which]][[1]], simplify = TRUE))
+        print(mirt::coef(res[[factor]][[which]][[1]], simplify = TRUE))
       }
     }
     invisible(res[[factor]][[which]][[1]]) # return object

@@ -103,7 +103,7 @@ partialMI <- function(res_clusterItems,
 
   if (!silent) {
     if (res$settings$dichModel == "factor") {      # lavaan
-      summary(output)
+      lavaan::summary(output, fit.measures = TRUE)
     } else {                                       # mirt
       cat("mirt model estimates\n\n")
       header <- capture.output(show(output))

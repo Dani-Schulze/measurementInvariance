@@ -20,8 +20,9 @@ plotAverage <- function(res_modelAveraging,
   res <- res_modelAveraging
 
   range <- max(res$muAver) - min(res$muAver)
-  h <- hist(res$muAver, ...) # to get height
-
+  suppressWarnings({
+    h <- hist(res$muAver, plot = FALSE, ...) # to get height
+  })
   # dealing with ellipsis arguments
   args <- list(main = "Model averaging",
                xlab = "Mean difference",
