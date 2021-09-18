@@ -2,56 +2,53 @@
 % Please edit documentation in R/testMI.R
 \name{testMI}
 \alias{testMI}
-\title{testMI}
+\title{Global MI test}
 \usage{
-model = "Factor1 =~ item1 + item2 + item3 + item4
-                Factor2 =~ item5 + item6 + item7 + item8"
-res_testMI <- testMI(model,
-                     data,
-                     group = "country",
-                     MIlevel = "strong")
+res_testMI <- testMI(items = NULL,
+                     data = NULL,
+                     group = NULL,
+                     MIlevel = NULL,
+                     stdItems = TRUE,
+                     itemType = "metric",
+                     dichModel = "factor")
 }
 \arguments{
-\item{model}{A SEM written in \code{\link[lavaan:lavaan]{lavaan}}'s syntax. Multidimensional models will be
-broken apart internally into single-factor models for the purpose of MI testing.}
+\item{items}{Describes the measurement model. It can either be:
+\itemize{
+ \item A vector of item names, e.g. \code{c("item1", "item2", "item3", "item4")}
+ \item A data frame section containing the items e.g. \code{data[1:4]}
+ }
+This creates a single factor model out of the item names.}
 
-\item{items}{Alternative to the model argument or lazy users with many items,
-creates a single factor model out of the item names. The latent variable is internally
-called "Factor".}
+\item{data}{A data frame containing all the used variables. Missing values have
+to be declared as \code{NA}.}
 
-\item{data}{A data frame containing all variables of relevance. Missings have
-to be declared \code{NA}.}
+\item{group}{String, indicating the grouping variable.}
 
-\item{group}{String, indicating the grouping variable}
+\item{MIlevel}{String, indicating the level of MI to be tested. Can be either \code{configural}, \code{weak},
+\code{strong}, or \code{strict}.}
 
-\item{MIlevel}{String, either \code{configural}
-, \code{weak}
-, \code{strong}
-, or \code{strict}
-. Alternatively,
-can be indicated per factor of interest in a single string
-(e.g. \code{"Factor1 weak Factor2 strong"}
-).
-If MI shall not be tested for all factors mentioned in \code{model}
- the user can simply drop
-those factors from this list (e.g. \code{"Factor1 weak"}
-).}
+\item{stdItems}{Should continuous items be standardized? Defaults to TRUE.
+Useful for making DIF sizes comparable.}
 
-\item{stdItems}{Should continuous items be standardized? Defaults to TRUE.}
+\item{itemType}{Can be \code{"dichotomous"} or \code{"metric"} (default).}
 
-\item{dich}{Are the items dichotomous? Defaults to FALSE.}
-
-\item{dichModel}{For dichotomous items, which model type should be applied?
-Can be \code{"factor"}
-(default) for a categorical SEM in lavaan, \code{"Rasch"}
- or  \code{"2PL"}
-for the respective IRT models to be estimated in mirt.}
+\item{dichModel}{String indicating which measurement model is applied in the case of dichotomous items.
+Values are \code{"factor"} (default) for probit link via WLSMV in lavaan.
+\code{"Rasch"} or  \code{"2PL"} for the respective IRT models to be estimated
+with the EM estimator in mirt.}
 }
 \value{
-A list with all estimated models (and some internally used info).
+A list containing
+\itemize{
+ \item Data (filtered for potential missings in the covariate)
+ \item Model specification(s)
+ \item Results of the MI tests
+ }
 Usually accessed via summary() or getModel().
 }
 \description{
 Global measurement invariance (MI) tests for the common MI levels
-(configural, weak, strong, and strict).
+(configural, weak, strong, and strict).  Can currently deal with multiple-group models (two or more groups)
+for metric items or dichotomous items (Rasch, 2PL, or probit model).
 }

@@ -11,7 +11,7 @@
 #'
 #' @return A histogram with 95% credibility interval lines.
 #'
-#' @usage plotAverage(res_modelAveraging)
+#' @usage plotAverage(res_modelAveraging = NULL)
 #'
 #' @export
 
