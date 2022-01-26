@@ -345,7 +345,7 @@ modelAveraging <- function(res_clusterItems = NULL,
                                                         chains = chains,
                                                         cores = CPUcores)
 
-        # convergence and presicion checks
+        # convergence and precision checks
         conv <- rstan::summary(fits[[paste0("Cluster=", currCluster)]])
         if (max(conv$summary[, 10]) > 1.10) {
           message(paste0("Convergence was not reached. (max PSR ",
@@ -369,7 +369,6 @@ modelAveraging <- function(res_clusterItems = NULL,
   }
 
   muAver <- NULL
-  sigmaAver <- NULL
   Rhat <- NULL  # set up storage for measures of convergence and efficiency
   Neff <- NULL
 
@@ -391,24 +390,13 @@ modelAveraging <- function(res_clusterItems = NULL,
     draws <- sample((iter/2):iter, nSims)
 
     if (res$model$dichModel != "Rasch") {
-      muAver <- append(muAver,
-                       rnorm(nSims,
-                             post$Alpha_free[draws],
-                             post$Psi_var[draws]/sqrt(nrow(res$data))))
+      muAver <- append(muAver, post$Alpha_free[draws])
     }
     if (res$model$dichModel == "Rasch") {
-      muAver <- append(muAver,
-                       rnorm(nSims,
-                             post$Alpha_free[draws],
-                             post$Psi_var[, 2][draws]/sqrt(nrow(res$data))))
+      muAver <- append(muAver, post$Alpha_free[draws])
     }
-    sigmaAver <- append(sigmaAver,  #! no finished yet (Averaging of Variance)
-                        rchisq(nSims,
-                              nrow(res$data) - 2,
-                              post$Psi_var[draws]))
   }
   resBMA <- list(muAver = muAver,
-                 #sigmaAver = sigmaAver,
                  Rhat = Rhat,
                  Neff = Neff,
                  fittedModels = fits,

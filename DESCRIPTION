@@ -1,7 +1,7 @@
 Package: measurementInvariance
 Type: Package
 Title: (Partial) measurement invariance analysis
-Version: 0.3.1-180921
+Version: 0.3.2-260122
 Authors@R: 
   c(person(given = "Daniel",
            family = "Schulze",

@@ -1,5 +1,9 @@
 # measurementInvariance 0.3.1-180921
 
+- Modifying Bayesian model averaging to fit procedure as described in 2022 SEM Paper
+
+# measurementInvariance 0.3.1-180921
+
 - overhauling the internal structure, thus changing some function arguments
 - functions work now stand alone
 - adding a plot function for the DIF clustering

@@ -1,6 +1,6 @@
 ---
 title: "Using measurementInvariance"
-author: "Daniel Schulze"
+author: "Daniel Schulze & Steffi Pohl"
 output: pdf_document
 ---
 
@@ -13,7 +13,7 @@ library(knitr)
 library(measurementInvariance)
 ```
 
-Version 0.3.1
+Version 0.3.2
 
 # Package overview
 
